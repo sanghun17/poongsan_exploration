@@ -2,7 +2,6 @@
 /out
 /out_mesh
 /out_fusion
-data/
 build/
 runs/
 .vscode
