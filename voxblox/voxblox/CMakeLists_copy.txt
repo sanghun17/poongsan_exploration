@@ -1,0 +1,85 @@
+cmake_minimum_required(VERSION 2.8.12)
+cmake_policy(SET CMP0048 NEW)
+project(voxblox)
+
+find_package(Protobuf REQUIRED)
+include_directories(${Protobuf_INCLUDE_DIRS})
+link_directories(${Protobuf_LIBRARY_DIRS})
+find_package(catkin_simple REQUIRED)
+catkin_simple(ALL_DEPS_REQUIRED)
+
+set(Protobuf_INCLUDE_DIR /usr/local/include)
+set(Protobuf_LIBRARIES /usr/local/lib/libprotobuf.so)
+
+set(CMAKE_MACOSX_RPATH 0)
+add_definitions(-std=c++11 -Wall -Wextra)
+
+############
+# PROTOBUF #
+############
+set(PROTO_DEFNS proto/voxblox/Block.proto
+                proto/voxblox/Layer.proto)
+set(BASE_PATH "proto")
+set(PROTOBUF_COMPILE_PYTHON true)
+
+PROTOBUF_CATKIN_GENERATE_CPP2(${BASE_PATH} PROTO_SRCS PROTO_HDRS ${PROTO_DEFNS})
+
+####################
+# SET SOURCE FILES #
+####################
+set("${PROJECT_NAME}_SRCS"
+  src/alignment/icp.cc
+  src/core/block.cc
+  src/core/esdf_map.cc
+  src/core/tsdf_map.cc
+  src/integrator/esdf_integrator.cc
+  src/integrator/esdf_occ_integrator.cc
+  src/integrator/integrator_utils.cc
+  src/integrator/intensity_integrator.cc
+  src/integrator/tsdf_integrator.cc
+  src/io/mesh_ply.cc
+  src/io/sdf_ply.cc
+  src/mesh/marching_cubes.cc
+  src/simulation/objects.cc
+  src/simulation/simulation_world.cc
+  src/utils/camera_model.cc
+  src/utils/evaluation_utils.cc
+  src/utils/layer_utils.cc
+  src/utils/neighbor_tools.cc
+  src/utils/protobuf_utils.cc
+  src/utils/timing.cc
+  src/utils/voxel_utils.cc
+)
+
+#############
+# LIBRARIES #
+#############
+cs_add_library(${PROJECT_NAME}_proto
+  ${PROTO_SRCS}
+)
+target_link_libraries(${PROJECT_NAME}_proto ${Protobuf_LIBRARIES})
+
+cs_add_library(${PROJECT_NAME}
+  ${${PROJECT_NAME}_SRCS}
+)
+target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_proto)
+
+############
+# BINARIES #
+############
+
+add_executable(tsdf_to_esdf
+  test/tsdf_to_esdf.cc
+)
+target_link_libraries(tsdf_to_esdf ${PROJECT_NAME})
+
+add_executable(test_load_esdf
+  test/test_load_esdf.cc
+)
+target_link_libraries(test_load_esdf ${PROJECT_NAME})
+
+##########
+# EXPORT #
+##########
+cs_install()
+cs_export(INCLUDE_DIRS ${CATKIN_DEVEL_PREFIX}/include)
