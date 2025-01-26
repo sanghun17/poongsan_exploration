@@ -32,3 +32,10 @@ catkin init
 catkin config --extend /opt/ros/noetic --merge-devel --cmake-args -DCMAKE_BUILD_TYPE=Release
 catkin build
 ```
+
+
+## 실행
+```basah
+roslaunch active_3d_planning_app_reconstruction esdf_voxblox.launch # esdf mapping 노드 실행
+roslaunch active_3d_planning_app_reconstruction exploration_planner.launch # exploration planner 노드 실행
+```
